@@ -28,11 +28,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
   @column()
-  declare company_id: number
+  declare companyId: number
 
   @column()
   declare role: RoleName
