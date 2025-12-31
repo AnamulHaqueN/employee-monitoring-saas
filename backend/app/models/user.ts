@@ -28,7 +28,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
-  @column({ columnName: 'isActive' })
+  @column()
   declare isActive: boolean
 
   @column()
@@ -43,11 +43,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
-
   @belongsTo(() => Company)
   declare company: BelongsTo<typeof Company>
 
   @hasMany(() => Screenshot)
   declare screenshots: HasMany<typeof Screenshot>
+
+  static accessTokens = DbAccessTokensProvider.forModel(User, {})
 }

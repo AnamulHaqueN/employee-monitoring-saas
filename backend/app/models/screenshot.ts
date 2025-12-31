@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import User from './user.js'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import User from './user.js'
 import Company from './company.js'
 
 export default class Screenshot extends BaseModel {
@@ -9,16 +9,16 @@ export default class Screenshot extends BaseModel {
   declare id: number
 
   @column()
-  declare file_path: string
+  declare filePath: string
 
   @column()
-  declare user_id: number
+  declare userId: number
 
   @column()
-  declare company_id: number
+  declare companyId: number
 
-  @column()
-  declare capture_time: DateTime
+  @column.dateTime()
+  declare captureTime: DateTime
 
   @column()
   declare date: Date
@@ -32,11 +32,8 @@ export default class Screenshot extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
-
   @belongsTo(() => User)
-  declare users: BelongsTo<typeof User>
+  declare user: BelongsTo<typeof User>
 
   @belongsTo(() => Company)
   declare company: BelongsTo<typeof Company>

@@ -13,7 +13,7 @@ export default class Company extends BaseModel {
   declare name: string
 
   @column()
-  declare plan_id: number
+  declare planId: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

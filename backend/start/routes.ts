@@ -10,6 +10,7 @@
 const AuthController = () => import('#controllers/auth_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+const PlansController = () => import('#controllers/plans_controller')
 
 router.get('/', async () => {
   return {
@@ -18,6 +19,7 @@ router.get('/', async () => {
 })
 
 // Public routes
+router.get('/plans', [PlansController, 'index'])
 router.post('/auth/register', [AuthController, 'registerCompany'])
 router.post('/auth/login', [AuthController, 'login'])
 

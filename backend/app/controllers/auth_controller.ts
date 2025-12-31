@@ -1,5 +1,4 @@
 import Company from '#models/company'
-import Plan from '#models/plan'
 import User from '#models/user'
 import { loginValidator, registerCompanyValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -15,7 +14,7 @@ export default class AuthController {
     // Create Company
     const company = await Company.create({
       name: data.companyName,
-      plan_id: data.planId,
+      planId: data.planId,
     })
 
     // Create owner user
@@ -23,7 +22,7 @@ export default class AuthController {
       name: data.ownerName,
       email: data.ownerEmail,
       password: data.password,
-      company_id: company.id,
+      companyId: company.id,
       role: 'owner',
       isActive: true,
     })
@@ -37,7 +36,7 @@ export default class AuthController {
         company: {
           id: company.id,
           name: company.name,
-          planId: company.plan_id,
+          planId: company.planId,
         },
         owner: {
           id: owner.id,
@@ -76,7 +75,7 @@ export default class AuthController {
           name: user.name,
           email: user.email,
           role: user.role,
-          companyId: user.company_id,
+          companyId: user.companyId,
         },
         token: token.value!.release(),
       },
@@ -100,7 +99,7 @@ export default class AuthController {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.company_id,
+        companyId: user.companyId,
         company: user.company,
       },
     })
