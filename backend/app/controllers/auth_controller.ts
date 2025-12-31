@@ -1,4 +1,5 @@
 import Company from '#models/company'
+import Plan from '#models/plan'
 import User from '#models/user'
 import { loginValidator, registerCompanyValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -8,13 +9,13 @@ export default class AuthController {
   async registerCompany({ request, response }: HttpContext) {
     const data = await request.validateUsing(registerCompanyValidator)
 
-    // check if plan exists
-    //const plan = await Plan.findOrFail(data.planId)
+    //check if plan exists
+    const plan = await Plan.findOrFail(data.planId)
 
     // Create Company
     const company = await Company.create({
       name: data.companyName,
-      planId: data.planId,
+      planId: plan.id,
     })
 
     // Create owner user

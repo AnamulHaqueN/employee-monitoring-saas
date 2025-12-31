@@ -20,8 +20,8 @@ export default class Screenshot extends BaseModel {
   @column.dateTime()
   declare captureTime: DateTime
 
-  @column()
-  declare date: Date
+  @column.dateTime({ autoCreate: true })
+  declare date: DateTime
 
   @column()
   declare hour: number

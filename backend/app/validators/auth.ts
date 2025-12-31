@@ -13,11 +13,10 @@ export const registerCompanyValidator = vine.compile(
 
     companyName: vine.string().trim().minLength(2).maxLength(255),
 
-    planId: vine.number().positive(),
-    // planId: vine.number().positive().exists({
-    //   table: 'plans',
-    //   column: 'id',
-    // }),
+    planId: vine.number().positive().exists({
+      table: 'plans',
+      column: 'id',
+    }),
   })
 )
 
