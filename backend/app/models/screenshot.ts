@@ -21,15 +21,6 @@ export default class Screenshot extends BaseModel {
   declare captureTime: DateTime
 
   @column.dateTime({ autoCreate: true })
-  declare date: DateTime
-
-  @column()
-  declare hour: number
-
-  @column()
-  declare minuteBucket: number
-
-  @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @belongsTo(() => User)

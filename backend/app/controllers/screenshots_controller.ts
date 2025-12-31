@@ -19,7 +19,7 @@ export default class ScreenshotsController {
       return response.forbidden({ message: 'Your account is inactive' })
     }
 
-    const { screenshot, captureTime } = await request.validateUsing(uploadScreenshotValidator)
+    const { screenshot } = await request.validateUsing(uploadScreenshotValidator)
 
     try {
       // Upload to Cloudinary
@@ -32,7 +32,7 @@ export default class ScreenshotsController {
       })
 
       // Extract date, hour, and minute bucket from capture time
-      const captureDateTime = DateTime.fromJSDate(captureTime)
+      const captureDateTime = DateTime.now().setZone('Asia/Dhaka')
       const date = captureDateTime.toISODate()!
       const hour = captureDateTime.hour
       const minute = captureDateTime.minute

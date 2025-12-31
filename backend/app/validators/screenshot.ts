@@ -6,7 +6,7 @@ export const uploadScreenshotValidator = vine.compile(
       size: '10mb',
       extnames: ['jpg', 'jpeg', 'png'],
     }),
-    captureTime: vine.date(),
+    // captureTime: vine.date(),
   })
 )
 
