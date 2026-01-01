@@ -4,6 +4,7 @@ import User from '#models/user'
 import { loginValidator, registerCompanyValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
+import { cookieConfig } from '../helper/jwt_cookie.js'
 
 export default class AuthController {
   async registerCompany({ request, response }: HttpContext) {
@@ -50,7 +51,7 @@ export default class AuthController {
     })
   }
 
-  async login({ request, response }: HttpContext) {
+  async login({ auth, request, response }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
     // Find user
@@ -66,7 +67,10 @@ export default class AuthController {
       return response.unauthorized({ message: 'Invalid credentials' })
     }
 
-    const token = await User.accessTokens.create(user, ['*'], { expiresIn: '7 days' })
+    // const token = await User.accessTokens.create(user, ['*'], { expiresIn: '7 days' })
+
+    const token = await auth.use('jwt').generate(user)
+    response.cookie('jwt_token', token.token, cookieConfig())
 
     return response.ok({
       message: 'Login successful',
@@ -78,14 +82,12 @@ export default class AuthController {
           role: user.role,
           companyId: user.companyId,
         },
-        token: token.value!.release(),
       },
     })
   }
 
-  async logout({ auth, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    await User.accessTokens.delete(user, user.currentAccessToken.identifier)
+  async logout({ response }: HttpContext) {
+    response.clearCookie('jwt_token')
 
     return response.ok({ message: 'Logout successful' })
   }

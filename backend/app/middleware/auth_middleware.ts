@@ -19,7 +19,21 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {}
   ) {
-    await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
+    const token = ctx.request.cookie('jwt_token')
+
+    if (token) {
+      ctx.request.request.headers.authorization = `Bearer ${token}`
+    }
+
+    try {
+      await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
+    } catch (error) {
+      ctx.response.clearCookie('jwt_token')
+      return ctx.response.unauthorized({
+        error: 'Authentication failed',
+        message: 'Invalid or Expired token',
+      })
+    }
     return next()
   }
 }

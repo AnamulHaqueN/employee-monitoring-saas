@@ -44,8 +44,6 @@ export default class ScreenshotsController {
         userId: user.id,
         companyId: user.companyId,
         captureTime: captureDateTime,
-        hour,
-        minuteBucket,
       })
 
       return response.created({
@@ -54,9 +52,9 @@ export default class ScreenshotsController {
           id: screenshotRecord.id,
           filePath: screenshotRecord.filePath,
           captureTime: screenshotRecord.captureTime,
-          date: screenshotRecord.date,
-          hour: screenshotRecord.hour,
-          minuteBucket: screenshotRecord.minuteBucket,
+          date: date,
+          hour: hour,
+          minuteBucket: minuteBucket,
         },
       })
     } catch (error) {
