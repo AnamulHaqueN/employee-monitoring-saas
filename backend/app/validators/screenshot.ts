@@ -13,7 +13,7 @@ export const uploadScreenshotValidator = vine.compile(
 export const getScreenshotsValidator = vine.compile(
   vine.object({
     employeeId: vine.number().positive().optional(),
-    date: vine.date().optional(),
+    //date: vine.date().optional(),
     page: vine.number().positive().optional(),
     limit: vine.number().positive().withoutDecimals().range([1, 100]).optional(),
   })

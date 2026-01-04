@@ -1,6 +1,8 @@
 import cloudinary from '#config/cloudinary'
+import Company from '#models/company'
 import Screenshot from '#models/screenshot'
-import { uploadScreenshotValidator } from '#validators/screenshot'
+import User from '#models/user'
+import { getScreenshotsValidator, uploadScreenshotValidator } from '#validators/screenshot'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
@@ -64,5 +66,217 @@ export default class ScreenshotsController {
         error: error.message,
       })
     }
+  }
+
+  /**
+   * Get all screenshots with pagination (Owner only)
+   */
+  async index({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    if (user.role != 'owner') {
+      return response.forbidden({ message: 'Only owner can permitted to see screenshot' })
+    }
+
+    const {
+      employeeId,
+      //date,
+      page = 1,
+      limit = 10,
+    } = await request.validateUsing(getScreenshotsValidator)
+
+    const query = Screenshot.query()
+      .where('company_id', user.companyId)
+      .preload('user', (userQuery) => {
+        userQuery.select('id', 'name', 'email')
+      })
+      .orderBy('capture_time', 'desc')
+
+    if (employeeId) {
+      // Verify employee belongs to company
+      const employee = await User.query()
+        .where('id', employeeId)
+        .where('company_id', user.companyId)
+        .where('role', 'employee')
+        .first()
+
+      if (!employee) {
+        return response.notFound({ message: 'Employee not Found' })
+      }
+
+      query.where('user_id', employeeId)
+    }
+
+    // if (date) {
+    //   const searchDate = DateTime.fromJSDate(date).toISODate()
+    //   query.where('date', searchDate)
+    // }
+
+    const screenshots = await query.paginate(page, limit)
+    return response.ok({
+      data: screenshots.serialize({
+        fields: {
+          pick: ['id', 'filePath', 'captureTime', 'date', 'hour', 'minuteBucket', 'createdAt'],
+        },
+        relations: {
+          user: {
+            fields: {
+              pick: ['id', 'name', 'email'],
+            },
+          },
+        },
+      }),
+    })
+  }
+
+  /**
+   * Get screenshots grouped by hour and 5-minute intervals (Owner only)
+   * This is the main view for the dashboard
+   */
+  async grouped({ auth, request, response }: HttpContext) {
+    const user = await auth.getUserOrFail()
+
+    if (user.role !== 'owner') {
+      return response.forbidden({ message: 'Only owners can view screenshots' })
+    }
+
+    const employeeId = Number(request.input('employeeId'))
+    const date = request.input('date') // yyyy-MM-dd
+
+    if (!employeeId || !date) {
+      return response.badRequest({
+        message: 'employeeId and date are required',
+      })
+    }
+
+    // Verify employee belongs to company
+    const employee = await User.query()
+      .where('id', employeeId)
+      .where('company_id', user.companyId)
+      .where('role', 'employee')
+      .first()
+
+    if (!employee) {
+      return response.notFound({ message: 'Employee not found' })
+    }
+
+    // Create date range (full day)
+    const startOfDay = DateTime.fromISO(date).startOf('day')
+    const endOfDay = startOfDay.endOf('day')
+
+    // Fetch screenshots for that day
+    const screenshots = await Screenshot.query()
+      .where('company_id', user.companyId)
+      .where('user_id', employeeId)
+      .whereBetween('capture_time', [startOfDay.toJSDate(), endOfDay.toJSDate()])
+      .orderBy('capture_time', 'asc')
+
+    // Group screenshots: hour -> minuteBucket
+    const grouped: Record<number, Record<number, any[]>> = {}
+
+    screenshots.forEach((screenshot) => {
+      const time = screenshot.captureTime
+      const hour = time.hour
+      const minuteBucket = Math.floor(time.minute / 5) * 5
+
+      if (!grouped[hour]) grouped[hour] = {}
+      if (!grouped[hour][minuteBucket]) grouped[hour][minuteBucket] = []
+
+      grouped[hour][minuteBucket].push({
+        id: screenshot.id,
+        filePath: screenshot.filePath,
+        captureTime: screenshot.captureTime,
+      })
+    })
+
+    // Statistics
+    const totalScreenshots = screenshots.length
+    const hoursActive = Object.keys(grouped).length
+
+    return response.ok({
+      employee: {
+        id: employee.id,
+        name: employee.name,
+      },
+      date,
+      statistics: {
+        totalScreenshots,
+        hoursActive,
+        firstScreenshot: screenshots[0]?.captureTime ?? null,
+        lastScreenshot: screenshots[screenshots.length - 1]?.captureTime ?? null,
+      },
+      screenshots: grouped,
+    })
+  }
+
+  async groupedAll({ auth, request, response }: HttpContext) {
+    const user = await auth.getUserOrFail()
+
+    if (user.role !== 'owner') {
+      return response.forbidden({
+        message: 'Only owners can view screenshots',
+      })
+    }
+
+    const employeeId = Number(request.input('employeeId'))
+
+    if (!employeeId) {
+      return response.badRequest({
+        message: 'employeeId is required',
+      })
+    }
+
+    // Verify employee belongs to company
+    const employee = await User.query()
+      .where('id', employeeId)
+      .where('company_id', user.companyId)
+      .where('role', 'employee')
+      .first()
+
+    if (!employee) {
+      return response.notFound({ message: 'Employee not found' })
+    }
+
+    // Fetch ALL screenshots for this employee
+    const screenshots = await Screenshot.query()
+      .where('company_id', user.companyId)
+      .where('user_id', employeeId)
+      .orderBy('capture_time', 'asc')
+
+    // Group screenshots: hour -> minuteBucket
+    const grouped: Record<number, Record<number, any[]>> = {}
+
+    screenshots.forEach((screenshot) => {
+      const time = screenshot.captureTime
+      const hour = time.hour
+      const minuteBucket = Math.floor(time.minute / 5) * 5
+
+      if (!grouped[hour]) grouped[hour] = {}
+      if (!grouped[hour][minuteBucket]) grouped[hour][minuteBucket] = []
+
+      grouped[hour][minuteBucket].push({
+        id: screenshot.id,
+        filePath: screenshot.filePath,
+        captureTime: screenshot.captureTime,
+      })
+    })
+
+    // Statistics
+    const totalScreenshots = screenshots.length
+    const hoursActive = Object.keys(grouped).length
+
+    return response.ok({
+      employee: {
+        id: employee.id,
+        name: employee.name,
+      },
+      statistics: {
+        totalScreenshots,
+        hoursActive,
+        firstScreenshot: screenshots[0]?.captureTime ?? null,
+        lastScreenshot: screenshots[screenshots.length - 1]?.captureTime ?? null,
+      },
+      screenshots: grouped,
+    })
   }
 }

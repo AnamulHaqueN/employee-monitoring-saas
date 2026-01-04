@@ -42,7 +42,8 @@ router
 
     // Screenshot routes
     router.post('/screenshots', [ScreenshotsController, 'upload'])
-    // router.get('/screenshots', [ScreenshotsController, 'index'])
-    // router.get('/screenshots/grouped', [ScreenshotsController, 'grouped'])
+    router.get('/screenshots', [ScreenshotsController, 'index'])
+    router.get('/screenshots/grouped', [ScreenshotsController, 'grouped'])
+    router.get('/screenshots/grouped/all', [ScreenshotsController, 'groupedAll'])
   })
   .use(middleware.auth())
