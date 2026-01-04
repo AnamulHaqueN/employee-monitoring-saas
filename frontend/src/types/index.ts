@@ -53,7 +53,6 @@ export interface ScreenshotGroupedResponse {
   employee: {
     id: number;
     name: string;
-    email: string;
   };
   date: string;
   statistics: {

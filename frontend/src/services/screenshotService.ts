@@ -32,7 +32,7 @@ export const screenshotService = {
     const response = await api.get("/screenshots/grouped", {
       params: { employeeId, date },
     });
-    return response.data.data;
+    return response.data;
   },
 
   async getByHour(employeeId: number, date: string, hour: number) {

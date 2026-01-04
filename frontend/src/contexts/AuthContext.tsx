@@ -24,23 +24,20 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initAuth = async () => {
-      if (authService.isAuthenticated()) {
-        try {
-          const userData = await authService.me();
-          setUser(userData);
-        } catch (error) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-        }
+      try {
+        const userData = await authService.me();
+        setUser(userData);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();
@@ -77,6 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

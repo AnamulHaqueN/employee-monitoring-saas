@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { employeeService } from "../services/employeeService";
 import { screenshotService } from "../services/screenshotService";
-import { format } from "date-fns";
 import type { Employee, ScreenshotGroupedResponse } from "../types";
 
 export const Dashboard = () => {
@@ -14,10 +14,12 @@ export const Dashboard = () => {
     useState<ScreenshotGroupedResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /* Load employees once */
   useEffect(() => {
     loadEmployees();
   }, []);
 
+  /* Load screenshots when filters change */
   useEffect(() => {
     if (selectedEmployee && selectedDate) {
       loadScreenshots();
@@ -27,90 +29,83 @@ export const Dashboard = () => {
   const loadEmployees = async () => {
     try {
       const data = await employeeService.getEmployees();
-      const activeEmployees = data.filter((emp) => emp.isActive);
+      const activeEmployees = data.filter((e) => e.isActive);
 
       setEmployees(activeEmployees);
 
       if (activeEmployees.length > 0) {
         setSelectedEmployee(activeEmployees[0].id);
       }
-    } catch (err) {
-      console.error("Failed to load employees:", err);
+    } catch (error) {
+      console.error("Failed to load employees", error);
     }
   };
 
   const loadScreenshots = async () => {
-    if (!selectedEmployee || !selectedDate) return;
-
     try {
       setLoading(true);
       const data = await screenshotService.getGroupedScreenshots(
-        selectedEmployee,
+        selectedEmployee!,
         selectedDate
       );
+
+      console.log("Grouped screenshot response:", data);
       setScreenshotData(data);
-    } catch (err) {
-      console.error("Failed to load screenshots:", err);
+    } catch (error) {
+      console.error("Failed to load screenshots", error);
       setScreenshotData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatTime = (hour: number, minuteBucket: number) => {
-    const endMinute = minuteBucket + 5;
-    return `${hour.toString().padStart(2, "0")}:${minuteBucket
+  const formatTimeRange = (hour: number, bucket: number) => {
+    const end = bucket + 5;
+    return `${hour.toString().padStart(2, "0")}:${bucket
       .toString()
-      .padStart(2, "0")} - ${hour.toString().padStart(2, "0")}:${endMinute
+      .padStart(2, "0")} - ${hour.toString().padStart(2, "0")}:${end
       .toString()
       .padStart(2, "0")}`;
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">
-        Activity Dashboard
-      </h1>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <h1 className="text-3xl font-bold mb-6">Activity Dashboard</h1>
 
       {/* Filters */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Employee
-            </label>
-            <select
-              value={selectedEmployee ?? ""}
-              onChange={(e) => setSelectedEmployee(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Choose an employee</option>
-              {employees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="bg-white rounded-lg shadow p-6 mb-6 grid md:grid-cols-2 gap-4">
+        <select
+          className="border rounded px-3 py-2"
+          value={selectedEmployee ?? ""}
+          onChange={(e) => setSelectedEmployee(Number(e.target.value))}
+        >
+          <option value="">Select employee</option>
+          {employees.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.name}
+            </option>
+          ))}
+        </select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Date
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+        <input
+          type="date"
+          className="border rounded px-3 py-2"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
       </div>
 
       {/* Loader */}
       {loading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="flex justify-center py-20">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" />
+        </div>
+      )}
+
+      {/* No data */}
+      {!loading && !screenshotData && (
+        <div className="bg-white p-10 text-center rounded shadow text-gray-500">
+          No screenshots found for this date
         </div>
       )}
 
@@ -118,14 +113,14 @@ export const Dashboard = () => {
       {!loading && screenshotData && (
         <>
           {/* Summary */}
-          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <div className="bg-white rounded shadow p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">
               {screenshotData.employee.name} — {screenshotData.date}
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Stat
-                label="Total Screenshots"
+                label="Total"
                 value={screenshotData.statistics.totalScreenshots}
                 color="blue"
               />
@@ -135,7 +130,7 @@ export const Dashboard = () => {
                 color="green"
               />
               <Stat
-                label="First Screenshot"
+                label="First"
                 value={
                   screenshotData.statistics.firstScreenshot
                     ? format(
@@ -147,7 +142,7 @@ export const Dashboard = () => {
                 color="purple"
               />
               <Stat
-                label="Last Screenshot"
+                label="Last"
                 value={
                   screenshotData.statistics.lastScreenshot
                     ? format(
@@ -161,47 +156,35 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* Screenshots */}
+          {/* Screenshots grouped */}
           {Object.entries(screenshotData.screenshots)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([hour, buckets]) => (
-              <div
-                key={hour}
-                className="bg-white shadow-md rounded-lg p-6 mb-6"
-              >
+              <div key={hour} className="bg-white rounded shadow p-6 mb-6">
                 <h3 className="text-lg font-semibold mb-4">
-                  Hour: {hour.padStart(2, "0")}:00
+                  Hour {hour.padStart(2, "0")}:00
                 </h3>
 
                 {Object.entries(buckets)
                   .sort(([a], [b]) => Number(a) - Number(b))
-                  .map(([minuteBucket, screenshots]) => (
-                    <div
-                      key={minuteBucket}
-                      className="border-l-4 border-blue-500 pl-4 mb-4"
-                    >
-                      <p className="text-sm font-medium text-gray-700 mb-2">
-                        {formatTime(Number(hour), Number(minuteBucket))} (
-                        {screenshots.length})
+                  .map(([bucket, shots]) => (
+                    <div key={bucket} className="mb-6">
+                      <p className="text-sm font-medium mb-2 text-gray-700">
+                        {formatTimeRange(Number(hour), Number(bucket))} (
+                        {shots.length})
                       </p>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {screenshots.map((screenshot) => (
-                          <div key={screenshot.id} className="relative">
+                        {shots.map((s) => (
+                          <div key={s.id} className="relative">
                             <img
-                              src={screenshot.filePath}
-                              alt="Screenshot"
-                              className="w-full h-32 object-cover rounded-lg cursor-pointer"
-                              onClick={() =>
-                                window.open(screenshot.filePath, "_blank")
-                              }
+                              src={s.filePath}
+                              className="h-32 w-full object-cover rounded cursor-pointer"
+                              onClick={() => window.open(s.filePath, "_blank")}
                             />
-                            <div className="absolute bottom-0 inset-x-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg">
-                              {format(
-                                new Date(screenshot.captureTime),
-                                "HH:mm:ss"
-                              )}
-                            </div>
+                            <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center rounded-b">
+                              {format(new Date(s.captureTime), "HH:mm:ss")}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -211,19 +194,18 @@ export const Dashboard = () => {
             ))}
         </>
       )}
-
-      {!loading && !screenshotData && selectedEmployee && (
-        <div className="bg-white shadow-md rounded-lg p-12 text-center">
-          <p className="text-gray-500 text-lg">
-            No screenshots found for this date
-          </p>
-        </div>
-      )}
     </div>
   );
 };
 
-/* Small stat component */
+/* Fixed Tailwind-safe Stat component */
+const colorMap = {
+  blue: "bg-blue-50 text-blue-600",
+  green: "bg-green-50 text-green-600",
+  purple: "bg-purple-50 text-purple-600",
+  orange: "bg-orange-50 text-orange-600",
+};
+
 const Stat = ({
   label,
   value,
@@ -231,10 +213,10 @@ const Stat = ({
 }: {
   label: string;
   value: number | string;
-  color: string;
+  color: keyof typeof colorMap;
 }) => (
-  <div className={`bg-${color}-50 p-4 rounded-lg`}>
-    <p className="text-sm text-gray-600">{label}</p>
-    <p className={`text-2xl font-bold text-${color}-600`}>{value}</p>
+  <div className={`p-4 rounded ${colorMap[color]}`}>
+    <p className="text-sm opacity-70">{label}</p>
+    <p className="text-2xl font-bold">{value}</p>
   </div>
 );

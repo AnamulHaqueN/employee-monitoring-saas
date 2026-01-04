@@ -15,15 +15,13 @@ export const authService = {
 
   async login(email: string, password: string) {
     const response = await api.post("/auth/login", { email, password });
-    const { token, user } = response.data.data;
-    localStorage.setItem("token", token);
+    const { user } = response.data.data;
     localStorage.setItem("user", JSON.stringify(user));
     return response.data;
   },
 
   async logout() {
-    await api.post("/auth/logout");
-    localStorage.removeItem("token");
+    await api.delete("/auth/logout");
     localStorage.removeItem("user");
   },
 
@@ -35,9 +33,5 @@ export const authService = {
   getCurrentUser(): User | null {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
-  },
-
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem("token");
   },
 };
