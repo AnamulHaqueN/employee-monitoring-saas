@@ -1,5 +1,4 @@
 import cloudinary from '#config/cloudinary'
-import Company from '#models/company'
 import Screenshot from '#models/screenshot'
 import User from '#models/user'
 import { getScreenshotsValidator, uploadScreenshotValidator } from '#validators/screenshot'
@@ -106,11 +105,6 @@ export default class ScreenshotsController {
 
       query.where('user_id', employeeId)
     }
-
-    // if (date) {
-    //   const searchDate = DateTime.fromJSDate(date).toISODate()
-    //   query.where('date', searchDate)
-    // }
 
     const screenshots = await query.paginate(page, limit)
     return response.ok({
