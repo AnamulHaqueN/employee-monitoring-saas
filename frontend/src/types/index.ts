@@ -80,3 +80,9 @@ export interface ScreenshotGroupedResponse {
   };
   screenshots: GroupedScreenshots;
 }
+
+interface UseScreenshotsResult {
+  screenshots: ScreenshotGroupedResponse | null;
+  loading: boolean;
+  notFound: boolean; // employee invalid
+}

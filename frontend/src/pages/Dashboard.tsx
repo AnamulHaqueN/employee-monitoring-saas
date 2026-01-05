@@ -5,7 +5,7 @@ import { useScreenshots } from "../hooks/useScreenshots";
 import { format } from "date-fns";
 import { EmployeeSelect } from "./EmployeeSelect";
 import { ScreenshotGrid } from "./ScreenshotGuid";
-import { AllScreenshots } from "./AllScreenshot";
+import type { ScreenshotGroupedResponse } from "../types";
 
 export const Dashboard = () => {
   const { employees, loading: employeesLoading } = useEmployees();
@@ -27,6 +27,9 @@ export const Dashboard = () => {
       setSelectedEmployee(filtered[0].id);
     }
   }, [filtered]);
+
+  const hasScreenshots = (data: ScreenshotGroupedResponse) =>
+    Object.keys(data.screenshots).length > 0;
 
   const { screenshots, loading: screenshotsLoading } = useScreenshots(
     selectedEmployee,
@@ -67,16 +70,18 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {screenshotsLoading ? (
-        <p>Loading screenshots...</p>
-      ) : screenshots ? (
-        <ScreenshotGrid data={screenshots} formatTime={formatTime} />
-      ) : (
-        <div>
-          <p>No Screenshot is found</p>
+      {screenshotsLoading && <p>Loading screenshots...</p>}
 
-          <AllScreenshots />
+      {/*  Employee exists but no screenshots */}
+      {!screenshotsLoading && screenshots && !hasScreenshots(screenshots) && (
+        <div className="text-center text-gray-500">
+          No screenshots found for this day
         </div>
+      )}
+
+      {/* Screenshots exist */}
+      {!screenshotsLoading && screenshots && hasScreenshots(screenshots) && (
+        <ScreenshotGrid data={screenshots} formatTime={formatTime} />
       )}
     </div>
   );

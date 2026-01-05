@@ -41,16 +41,4 @@ export const screenshotService = {
     });
     return response.data.data;
   },
-
-  async deleteScreenshot(id: number) {
-    const response = await api.delete(`/screenshots/${id}`);
-    return response.data;
-  },
-
-  async getStatistics(employeeId: number, startDate: string, endDate: string) {
-    const response = await api.get("/screenshots/statistics", {
-      params: { employeeId, startDate, endDate },
-    });
-    return response.data.data;
-  },
 };
