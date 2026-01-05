@@ -1,5 +1,5 @@
 import api from "../config/axios";
-import type { ScreenshotGroupedResponse } from "../types";
+import type { ScreenshotGroupedResponse, ScreenshotResponse } from "../types";
 
 export const screenshotService = {
   async upload(screenshot: File, captureTime: Date) {
@@ -20,9 +20,9 @@ export const screenshotService = {
     date?: string;
     page?: number;
     limit?: number;
-  }) {
-    const response = await api.get("/screenshots", { params });
-    return response.data.data;
+  }): Promise<ScreenshotResponse> {
+    const { data } = await api.get("/screenshots", { params });
+    return data.data;
   },
 
   async getGroupedScreenshots(

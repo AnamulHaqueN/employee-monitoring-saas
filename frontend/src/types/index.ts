@@ -43,6 +43,23 @@ export interface Screenshot {
   };
 }
 
+export interface PaginationMeta {
+  total: number;
+  perPage: number;
+  currentPage: number;
+  lastPage: number;
+  firstPage: number;
+  firstPageUrl: string;
+  lastPageUrl: string;
+  nextPageUrl: string | null;
+  previousPageUrl: string | null;
+}
+
+export interface ScreenshotResponse {
+  meta: PaginationMeta;
+  data: Screenshot[];
+}
+
 export interface GroupedScreenshots {
   [hour: number]: {
     [minuteBucket: number]: Screenshot[];

@@ -28,5 +28,5 @@ export const ProtectedRoute = ({
     return <Navigate to="/" />;
   }
 
-  return <>{children}</>;
+  return children;
 };
