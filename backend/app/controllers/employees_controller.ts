@@ -4,11 +4,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class EmployeesController {
   async index({ auth, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owner can view employee' })
-    }
+    const user = await auth.getUserOrFail()
 
     const employees = await User.query()
       .where('company_id', user.companyId)
@@ -19,11 +15,7 @@ export default class EmployeesController {
   }
 
   async store({ auth, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can add employees' })
-    }
+    const user = await auth.getUserOrFail()
 
     const data = await request.validateUsing(addEmployeeValidator)
 
@@ -59,11 +51,7 @@ export default class EmployeesController {
   }
 
   async show({ auth, params, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can view employee details' })
-    }
+    const user = await auth.getUserOrFail()
 
     const employee = await User.query()
       .where('id', params.id)
@@ -79,11 +67,7 @@ export default class EmployeesController {
   }
 
   async update({ auth, params, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can update employees' })
-    }
+    const user = await auth.getUserOrFail()
 
     const employee = await User.query()
       .where('id', params.id)
@@ -109,11 +93,7 @@ export default class EmployeesController {
   }
 
   async destroy({ auth, params, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can delete employees' })
-    }
+    const user = await auth.getUserOrFail()
 
     const employee = await User.query()
       .where('id', params.id)
@@ -131,11 +111,7 @@ export default class EmployeesController {
   }
 
   async search({ auth, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can search employees' })
-    }
+    const user = await auth.getUserOrFail()
 
     const { name } = request.qs()
 

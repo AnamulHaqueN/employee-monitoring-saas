@@ -33,12 +33,16 @@ router
     router.get('/auth/me', [AuthController, 'me'])
 
     // Employee routes (owner only)
-    router.get('/employees', [EmployeesController, 'index'])
-    router.post('/employees', [EmployeesController, 'store'])
-    router.get('/employees/search', [EmployeesController, 'search'])
-    router.get('/employees/:id', [EmployeesController, 'show'])
-    router.put('/employees/:id', [EmployeesController, 'update'])
-    router.delete('/employees/:id', [EmployeesController, 'destroy'])
+    router
+      .group(() => {
+        router.get('/employees', [EmployeesController, 'index'])
+        router.post('/employees', [EmployeesController, 'store'])
+        router.get('/employees/search', [EmployeesController, 'search'])
+        router.get('/employees/:id', [EmployeesController, 'show'])
+        router.put('/employees/:id', [EmployeesController, 'update'])
+        router.delete('/employees/:id', [EmployeesController, 'destroy'])
+      })
+      .use(middleware.role(['admin']))
 
     // Screenshot routes
     router.post('/screenshots', [ScreenshotsController, 'upload'])
