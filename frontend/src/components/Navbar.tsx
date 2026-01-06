@@ -13,6 +13,7 @@ export const Navbar = () => {
     try {
       await logout();
       navigate("/login");
+      setLoading(false);
     } catch {
       setLoading(false);
     }

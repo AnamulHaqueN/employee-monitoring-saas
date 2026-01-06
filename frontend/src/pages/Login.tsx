@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { validateLogin } from "../validator/loginValidator";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,6 +19,16 @@ export const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
+    
+    // Call reusable validator
+    const errors = validateLogin(email, password);
+    const hasErrors = Object.keys(errors).length > 0;
+    if (hasErrors && JSON.stringify(errors) !== JSON.stringify(fieldErrors)) {
+      setFieldErrors(errors);
+    } else if (!hasErrors && Object.keys(fieldErrors).length > 0) {
+      setFieldErrors({});
+    }
     setLoading(true);
 
     try {
@@ -57,6 +72,9 @@ export const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.email && (
+                <p className="text-red-600 text-sm mt-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -74,6 +92,11 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.password && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
           </div>
 

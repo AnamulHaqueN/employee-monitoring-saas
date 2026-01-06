@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { planService } from "../services/planService";
 import type { Plan } from "../types";
+import { validateRegisterForm } from "../validator/registerValidator";
 
 export const Register = () => {
   const [ownerName, setOwnerName] = useState("");
@@ -13,6 +14,13 @@ export const Register = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    ownerName?: string;
+    ownerEmail?: string;
+    password?: string;
+    companyName?: string;
+    planId?: string;
+  }>({});
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -36,13 +44,30 @@ export const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Call reusable validator
+    const { errors, isValid } = validateRegisterForm({
+      ownerName,
+      ownerEmail,
+      password,
+      companyName,
+      planId,
+    });
+
+    if (!isValid) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
+
     setLoading(true);
 
     try {
       await register({ ownerName, ownerEmail, password, companyName, planId });
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Please enter valid details");
     } finally {
       setLoading(false);
     }
@@ -79,6 +104,11 @@ export const Register = () => {
                 onChange={(e) => setOwnerName(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.ownerName && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.ownerName}
+                </p>
+              )}
             </div>
 
             <div>
@@ -96,6 +126,11 @@ export const Register = () => {
                 onChange={(e) => setOwnerEmail(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.ownerEmail && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.ownerEmail}
+                </p>
+              )}
             </div>
 
             <div>
@@ -113,6 +148,11 @@ export const Register = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.password && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div>
@@ -130,6 +170,11 @@ export const Register = () => {
                 onChange={(e) => setCompanyName(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               />
+              {fieldErrors.companyName && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.companyName}
+                </p>
+              )}
             </div>
 
             <div>
@@ -152,6 +197,11 @@ export const Register = () => {
                   </option>
                 ))}
               </select>
+              {fieldErrors.planId && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldErrors.planId}
+                </p>
+              )}
             </div>
           </div>
 
