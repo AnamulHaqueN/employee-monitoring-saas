@@ -1,13 +1,21 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useState } from "react";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+    if (loading) return;
+    setLoading(true);
+    try {
+      await logout();
+      navigate("/login");
+    } catch {
+      setLoading(false);
+    }
   };
 
   if (!user) return null;

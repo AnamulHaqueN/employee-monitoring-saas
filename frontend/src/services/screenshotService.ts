@@ -2,16 +2,14 @@ import api from "../config/axios";
 import type { ScreenshotGroupedResponse, ScreenshotResponse } from "../types";
 
 export const screenshotService = {
-  async upload(screenshot: File, captureTime: Date) {
+  async upload(screenshot: File) {
     const formData = new FormData();
     formData.append("screenshot", screenshot);
-    formData.append("captureTime", captureTime.toISOString());
 
     const response = await api.post("/screenshots", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
+
     return response.data;
   },
 
