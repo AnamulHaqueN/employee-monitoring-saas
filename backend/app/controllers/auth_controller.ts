@@ -58,7 +58,7 @@ export default class AuthController {
     const user = await User.query().where('email', email).where('isActive', true).first()
 
     if (!user) {
-      return response.unauthorized({ message: 'Invalid credentials' })
+      return response.unauthorized({ message: 'Please enter valid email and password' })
     }
 
     // Verify password

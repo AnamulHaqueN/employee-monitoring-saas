@@ -42,12 +42,19 @@ router
         router.put('/employees/:id', [EmployeesController, 'update'])
         router.delete('/employees/:id', [EmployeesController, 'destroy'])
       })
-      .use(middleware.role(['admin']))
+      .use(middleware.role(['owner']))
 
     // Screenshot routes
-    router.post('/screenshots', [ScreenshotsController, 'upload'])
-    router.get('/screenshots', [ScreenshotsController, 'index'])
-    router.get('/screenshots/grouped', [ScreenshotsController, 'grouped'])
-    router.get('/screenshots/grouped/all', [ScreenshotsController, 'groupedAll'])
+    router
+      .post('/screenshots', [ScreenshotsController, 'upload'])
+      .use(middleware.role(['employee']))
+
+    router
+      .group(() => {
+        router.get('/screenshots', [ScreenshotsController, 'index'])
+        router.get('/screenshots/grouped', [ScreenshotsController, 'grouped'])
+        router.get('/screenshots/grouped/all', [ScreenshotsController, 'groupedAll'])
+      })
+      .use(middleware.role(['owner']))
   })
   .use(middleware.auth())

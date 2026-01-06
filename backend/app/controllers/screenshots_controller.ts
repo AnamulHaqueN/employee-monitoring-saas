@@ -12,10 +12,6 @@ export default class ScreenshotsController {
   async upload({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
-    if (user.role !== 'employee') {
-      return response.forbidden({ message: 'Only employees can upload screenshots' })
-    }
-
     if (!user.isActive) {
       return response.forbidden({ message: 'Your account is inactive' })
     }
@@ -73,10 +69,6 @@ export default class ScreenshotsController {
   async index({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
-    if (user.role != 'owner') {
-      return response.forbidden({ message: 'Only owner can permitted to see screenshot' })
-    }
-
     const {
       employeeId,
       //date,
@@ -129,10 +121,6 @@ export default class ScreenshotsController {
    */
   async grouped({ auth, request, response }: HttpContext) {
     const user = await auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({ message: 'Only owners can view screenshots' })
-    }
 
     const employeeId = Number(request.input('employeeId'))
     const date = request.input('date') // yyyy-MM-dd
@@ -205,12 +193,6 @@ export default class ScreenshotsController {
 
   async groupedAll({ auth, request, response }: HttpContext) {
     const user = await auth.getUserOrFail()
-
-    if (user.role !== 'owner') {
-      return response.forbidden({
-        message: 'Only owners can view screenshots',
-      })
-    }
 
     const employeeId = Number(request.input('employeeId'))
 
