@@ -1,4 +1,5 @@
 import type { ScreenshotGroupedResponse } from "../types";
+import { formatLocalTime } from "../utils/timezone";
 
 export const ScreenshotGrid = ({
   data,
@@ -36,7 +37,7 @@ export const ScreenshotGrid = ({
                         onClick={() => window.open(s.filePath, "_blank")}
                       />
                       <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center rounded-b">
-                        {new Date(s.captureTime).toLocaleTimeString()}
+                        {formatLocalTime(s.captureTime)}
                       </span>
                     </div>
                   ))}

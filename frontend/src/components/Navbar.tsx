@@ -25,7 +25,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-blue-600">
+            <Link to="/dashboard" className="text-xl font-bold text-blue-600">
               Activity Tracker
             </Link>
             <div className="ml-10 flex space-x-4">

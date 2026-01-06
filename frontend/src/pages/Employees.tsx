@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEmployees } from "../hooks/useEmployees";
 import { EmployeeRow } from "./EmployeeRow";
 import { AddEmployeeModal } from "./AddEmployeeModal";
+import { useDebounce } from "../hooks/useDebounce";
 
 export const Employees = () => {
   const {
@@ -14,6 +15,15 @@ export const Employees = () => {
   } = useEmployees();
 
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // debounce search term
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  // call API only when debounced value changes
+  useEffect(() => {
+    searchEmployees(debouncedSearch);
+  }, [debouncedSearch]);
 
   if (loading) {
     return <div className="flex justify-center py-20">Loading...</div>;
@@ -34,7 +44,7 @@ export const Employees = () => {
       <input
         className="w-full mb-4 p-2 border rounded"
         placeholder="Search..."
-        onChange={(e) => searchEmployees(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       <table className="w-full bg-white shadow rounded">

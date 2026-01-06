@@ -18,8 +18,12 @@ export const useEmployees = () => {
   };
 
   const searchEmployees = async (term: string) => {
-    if (!term.trim()) return loadEmployees();
-    setEmployees(await employeeService.searchEmployees(term));
+    try {
+      if (!term.trim()) await loadEmployees();
+      else setEmployees(await employeeService.searchEmployees(term));
+    } catch (err) {
+      console.error("search failed", err);
+    }
   };
 
   const toggleActive = async (id: number, isActive: boolean) => {
