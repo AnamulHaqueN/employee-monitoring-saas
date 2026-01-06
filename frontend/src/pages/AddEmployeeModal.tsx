@@ -9,12 +9,19 @@ export const AddEmployeeModal = ({
   onSuccess: () => void;
 }) => {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await employeeService.addEmployee(form);
-    onSuccess();
-    onClose();
+    if (loading) return;
+    setLoading(true);
+    try {
+      await employeeService.addEmployee(form);
+      onSuccess();
+      onClose();
+    } catch {
+      setLoading(false);
+    }
   };
 
   return (

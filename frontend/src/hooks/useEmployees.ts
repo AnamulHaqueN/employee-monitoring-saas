@@ -27,13 +27,25 @@ export const useEmployees = () => {
   };
 
   const toggleActive = async (id: number, isActive: boolean) => {
-    await employeeService.updateEmployee(id, { isActive: !isActive });
-    loadEmployees();
+    if (loading) return;
+    setLoading(true);
+    try {
+      await employeeService.updateEmployee(id, { isActive: !isActive });
+      loadEmployees();
+    } catch {
+      setLoading(false);
+    }
   };
 
   const deleteEmployee = async (id: number) => {
-    await employeeService.deleteEmployee(id);
-    loadEmployees();
+    if (loading) return;
+    setLoading(true);
+    try {
+      await employeeService.deleteEmployee(id);
+      loadEmployees();
+    } catch {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
